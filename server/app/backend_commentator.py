@@ -17,6 +17,7 @@ from agora_agent.agentkit.token import ROLE_PUBLISHER, generate_rtc_token
 from PIL import Image
 
 from .agora_region import area_code_value
+from .commentator_profiles import CommentatorProfile
 from .config import Settings
 from .models import CommentatorStats, MatchContext
 
@@ -34,6 +35,7 @@ class _TtsStreamResult:
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 OPENAI_SPEECH_URL = "https://api.openai.com/v1/audio/speech"
 ELEVENLABS_SPEECH_URL = "https://api.elevenlabs.io/v1/text-to-speech"
+FISH_AUDIO_SPEECH_URL = "https://api.fish.audio/v1/tts"
 PCM_CHANNELS = 1
 PCM_BYTES_PER_SAMPLE = 2
 TRANSCRIPT_TURN_END = 1
@@ -166,13 +168,15 @@ def _push_audio_chunk_to_connection(
     return sender.send_audio_pcm_data(frame)
 
 
-def _transcript_payload(*, text: str, agent_uid: int, turn_id: int) -> bytes:
+def _transcript_payload(
+    *, text: str, agent_uid: int, turn_id: int, language: str = "en"
+) -> bytes:
     payload = {
         "object": "assistant.transcription",
         "text": text,
         "start_ms": 0,
         "duration_ms": 0,
-        "language": "en",
+        "language": language,
         "turn_id": turn_id,
         "stream_id": 0,
         "user_id": str(agent_uid),
@@ -189,6 +193,7 @@ def _build_visual_prompt(
     *,
     samples: list[FrameSnapshot],
     previous_calls: list[str],
+    profile: CommentatorProfile | None = None,
 ) -> str:
     if match is None:
         context = "Game context: the live sports feed."
@@ -197,8 +202,60 @@ def _build_visual_prompt(
 
     latest_time = samples[-1].video_time if samples else 0.0
     previous = "\n".join(f"- {call}" for call in previous_calls[-5:]) or "- none"
+    if profile and profile.language.startswith("zh"):
+        return (
+            "你是实时足球解说员，不是图片说明员。\n"
+            f"解说员角色：{profile.label}。\n"
+            f"风格要求：{profile.style_prompt}\n"
+            f"{context}\n"
+            f"当前视频源时间：{latest_time:.1f} 秒。\n"
+            "你会看到一小段连续画面，顺序是从旧到新。只解说最新可见动作："
+            "持球推进、盘带、传球、斜传、传中、射门、扑救、解围、逼抢、反击、"
+            "防线移动、庆祝或球员重新组织。快节奏时短句，发展中的进攻可以稍长，"
+            "通常 8 到 24 个汉字，最多一句。\n"
+            "只要画面里能看清比赛、球员、球场或球权区域，就给出有依据的解说。"
+            "只有在最新画面不可读、没有足球动作、或明显是静态暂停/纯观众镜头时，"
+            "才只返回 NO_CALL。\n"
+            "写之前先检查持球人、传球人、射门人、门将和最近防守人的球衣号码。"
+            "如果号码、球衣颜色和阵容信息能对应，就用球员短名；看不清号码时，"
+            "用位置或角色描述，不要编球员名。\n"
+            "除非最新画面明确支持，不要说开球、点球、进球、扳平、犯规、比分、"
+            "场外声音或画面外事件。已知最终比分只是背景元数据，不要当成实时比分播报。\n"
+            "避免重复最近这些解说：\n"
+            f"{previous}"
+        )
+    if profile and profile.language.startswith("fr"):
+        return (
+            "Tu es un commentateur football en direct, pas un rédacteur de légende d'image.\n"
+            f"Profil du commentateur : {profile.label}.\n"
+            f"Style demandé : {profile.style_prompt}\n"
+            f"{context}\n"
+            f"Temps actuel dans la source vidéo : {latest_time:.1f} s.\n"
+            "Tu vois une courte rafale d'images, de la plus ancienne à la plus récente. "
+            "Commente uniquement l'action la plus récente visible : conduite de balle, "
+            "dribble, passe, centre, tir, arrêt, dégagement, pressing, contre-attaque, "
+            "ligne défensive, célébration ou réorganisation des joueurs. Rythme de direct : "
+            "phrases courtes quand ça va vite, un peu plus développées quand l'action se "
+            "construit, généralement 4 à 16 mots, une phrase maximum.\n"
+            "Fais un commentaire ancré dans l'image dès qu'un match, des joueurs, le terrain "
+            "ou la zone du ballon sont lisibles. Retourne exactement NO_CALL seulement si "
+            "la dernière image est illisible, qu'aucune action de football n'est visible, "
+            "ou que la scène est clairement un arrêt de jeu statique, un ralenti, ou un plan "
+            "foule sans changement visible.\n"
+            "Avant d'écrire, inspecte les numéros visibles du porteur, du passeur, du tireur, "
+            "du gardien et du défenseur le plus proche. Si le numéro, le maillot et le contexte "
+            "correspondent à l'effectif, utilise le nom court du joueur. Si ce n'est pas clair, "
+            "décris le rôle sans inventer de nom.\n"
+            "Ne dis pas coup d'envoi, penalty, but, égalisation, faute, score, son du stade "
+            "ou événement hors champ sauf si la dernière image le montre clairement. Le score "
+            "final connu est une métadonnée privée, pas un score en direct à annoncer.\n"
+            "Commentaires récents à éviter de répéter :\n"
+            f"{previous}"
+        )
     return (
         "You are a live football play-by-play commentator, not an image captioner.\n"
+        f"Commentator profile: {profile.label if profile else 'Default sportscaster'}.\n"
+        f"Style guide: {profile.style_prompt if profile else 'Use grounded live broadcast play-by-play.'}\n"
         f"{context}\n"
         f"Current video clock in the source: {latest_time:.1f}s.\n"
         "You are given a short burst of frames, oldest first and newest last. "
@@ -813,12 +870,14 @@ class BackendVisionCommentator:
         agent_uid: int,
         match_context: MatchContext | None,
         media_uid: int,
+        profile: CommentatorProfile | None = None,
     ):
         self._settings = settings
         self._channel_name = channel_name
         self._agent_uid = agent_uid
         self._match_context = match_context
         self._media_uid = media_uid
+        self._profile = profile
         self._stop = asyncio.Event()
         self._task: asyncio.Task[None] | None = None
         self._sampler_task: asyncio.Task[None] | None = None
@@ -1261,6 +1320,7 @@ class BackendVisionCommentator:
                     self._match_context,
                     samples=samples,
                     previous_calls=self._previous_calls,
+                    profile=self._profile,
                 ),
             }
         ]
@@ -1333,6 +1393,19 @@ class BackendVisionCommentator:
             else:
                 logger.warning(
                     "TTS_PROVIDER=elevenlabs requires ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID; falling back to OpenAI TTS"
+                )
+        if self._settings.tts_provider in {"fish_audio", "fishaudio", "fish"}:
+            if self._settings.fish_audio_api_key and self._settings.fish_audio_voice_id:
+                try:
+                    return await self._synthesize_speech_fish_audio(text)
+                except Exception:
+                    logger.warning(
+                        "Fish Audio TTS failed; falling back to OpenAI TTS",
+                        exc_info=True,
+                    )
+            else:
+                logger.warning(
+                    "TTS_PROVIDER=fish_audio requires FISH_AUDIO_API_KEY and FISH_AUDIO_VOICE_ID; falling back to OpenAI TTS"
                 )
 
         return await self._synthesize_speech_openai(text)
@@ -1516,9 +1589,63 @@ class BackendVisionCommentator:
                 target_rate=self._settings.commentary_audio_sample_rate,
             )
 
+    async def _synthesize_speech_fish_audio(self, text: str) -> bytes:
+        if self._settings.fish_audio_format != "pcm":
+            raise RuntimeError("FISH_AUDIO_FORMAT must be pcm for Agora audio publishing.")
+        if not self._settings.fish_audio_api_key:
+            raise RuntimeError("FISH_AUDIO_API_KEY is required for Fish Audio commentary audio.")
+        if not self._settings.fish_audio_voice_id:
+            raise RuntimeError("FISH_AUDIO_VOICE_ID is required for Fish Audio commentary audio.")
+
+        source_rate = (
+            self._settings.fish_audio_sample_rate
+            or self._settings.commentary_audio_sample_rate
+        )
+        async with httpx.AsyncClient(timeout=35) as client:
+            response = await client.post(
+                FISH_AUDIO_SPEECH_URL,
+                headers={
+                    "Authorization": f"Bearer {self._settings.fish_audio_api_key}",
+                    "Content-Type": "application/json",
+                    "model": self._settings.fish_audio_model,
+                },
+                json={
+                    "text": text,
+                    "reference_id": self._settings.fish_audio_voice_id,
+                    "format": self._settings.fish_audio_format,
+                    "sample_rate": source_rate,
+                    "latency": self._settings.fish_audio_latency,
+                    "chunk_length": self._settings.fish_audio_chunk_length,
+                    "normalize": True,
+                    "prosody": {
+                        "speed": self._settings.fish_audio_speed,
+                        "volume": self._settings.fish_audio_volume,
+                        "normalize_loudness": self._settings.fish_audio_normalize_loudness,
+                    },
+                },
+            )
+            response.raise_for_status()
+            self._tts_requests += 1
+            self._last_audio_at = int(time.time())
+            logger.info(
+                "Generated Fish Audio commentary audio bytes=%s voice=%s model=%s source_rate=%s target_rate=%s",
+                len(response.content),
+                self._settings.fish_audio_voice_id,
+                self._settings.fish_audio_model,
+                source_rate,
+                self._settings.commentary_audio_sample_rate,
+            )
+            return _resample_pcm_mono(
+                response.content,
+                source_rate=source_rate,
+                target_rate=self._settings.commentary_audio_sample_rate,
+            )
+
     def _tts_description(self) -> str:
         if self._settings.tts_provider == "elevenlabs":
             return f"elevenlabs:{self._settings.elevenlabs_model}:{self._settings.elevenlabs_voice_id}"
+        if self._settings.tts_provider in {"fish_audio", "fishaudio", "fish"}:
+            return f"fish_audio:{self._settings.fish_audio_model}:{self._settings.fish_audio_voice_id}"
         return f"openai:{self._settings.openai_tts_model}:{self._settings.openai_tts_voice}"
 
     async def _publish_transcript(self, connection: object, text: str) -> None:
@@ -1526,6 +1653,7 @@ class BackendVisionCommentator:
             text=text,
             agent_uid=self._agent_uid,
             turn_id=self._turn_id,
+            language=self._profile.transcript_language if self._profile else "en",
         )
         ret = connection.send_stream_message(payload)
         if ret != 0:

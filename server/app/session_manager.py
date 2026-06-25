@@ -5,6 +5,11 @@ from collections import deque
 from collections.abc import Iterable
 
 from .backend_commentator import BackendVisionCommentator
+from .commentator_profiles import (
+    CommentatorProfile,
+    resolve_commentator_profile,
+    settings_for_commentator_profile,
+)
 from .config import Settings
 from .models import (
     SessionLifecycleEvent,
@@ -23,6 +28,7 @@ class LiveSession:
         session_id: str,
         agent_id: str,
         channel_name: str,
+        profile: CommentatorProfile,
         commentator: BackendVisionCommentator,
         created_at: int,
         created_at_monotonic: float,
@@ -30,6 +36,7 @@ class LiveSession:
         self.session_id = session_id
         self.agent_id = agent_id
         self.channel_name = channel_name
+        self.profile = profile
         self.commentator = commentator
         self.created_at = created_at
         self.created_at_monotonic = created_at_monotonic
@@ -65,13 +72,16 @@ class SessionManager:
             agent_uid = request.agent_uid or self._settings.agent_uid
             media_uid = request.media_uid or self._settings.match_feed_uid
             session_id = f"{request.channel_name}:{media_uid}:{int(time.time())}"
+            profile = resolve_commentator_profile(request.commentator_profile_id)
+            profile_settings = settings_for_commentator_profile(self._settings, profile)
 
             commentator = BackendVisionCommentator(
-                settings=self._settings,
+                settings=profile_settings,
                 channel_name=request.channel_name,
                 agent_uid=agent_uid,
                 match_context=request.match_context,
                 media_uid=media_uid,
+                profile=profile,
             )
             try:
                 commentator.start()
@@ -82,6 +92,7 @@ class SessionManager:
                             session_id=session_id,
                             agent_id="startup-rollback",
                             channel_name=request.channel_name,
+                            profile=profile,
                             commentator=commentator,
                             created_at=int(time.time()),
                             created_at_monotonic=time.monotonic(),
@@ -97,6 +108,7 @@ class SessionManager:
                 session_id=session_id,
                 agent_id=agent_id,
                 channel_name=request.channel_name,
+                profile=profile,
                 commentator=commentator,
                 created_at=created_at,
                 created_at_monotonic=time.monotonic(),
@@ -106,7 +118,7 @@ class SessionManager:
             self._emit_event(
                 session,
                 "session_started",
-                "Backend AI session started; waiting for OBS frames before AI vision spend.",
+                f"{profile.label} session started; waiting for OBS frames before AI vision spend.",
             )
             session.monitor_task = asyncio.create_task(
                 self._monitor_session(session_id),
@@ -122,6 +134,8 @@ class SessionManager:
                 channel_name=request.channel_name,
                 agent_uid=str(agent_uid),
                 media_uid=str(media_uid),
+                commentator_profile_id=profile.id,
+                commentator_profile_label=profile.label,
                 source_mode="agora-gateway",
                 vision_mode="backend-openai-vision-rtc",
                 warnings=[],
@@ -238,6 +252,8 @@ class SessionManager:
             session_id=session.session_id,
             agent_id=session.agent_id,
             channel_name=session.channel_name,
+            commentator_profile_id=session.profile.id,
+            commentator_profile_label=session.profile.label,
             created_at=session.created_at,
             stopped_at=session.stopped_at,
             stop_reason=session.stop_reason,

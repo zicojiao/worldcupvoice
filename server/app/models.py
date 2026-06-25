@@ -38,6 +38,7 @@ class StartSessionRequest(BaseModel):
     channel_name: str = Field(min_length=1)
     source_mode: Literal["agora-gateway"] = "agora-gateway"
     match_context: MatchContext | None = None
+    commentator_profile_id: str | None = None
     agent_uid: int | None = None
     media_uid: int | None = None
 
@@ -51,6 +52,8 @@ class StartSessionResponse(BaseModel):
     source_mode: Literal["agora-gateway"] = "agora-gateway"
     agent_uid: str
     media_uid: str
+    commentator_profile_id: str
+    commentator_profile_label: str
     vision_mode: Literal["agora-convoai-mllm", "backend-openai-vision-rtc"]
     warnings: list[str] = []
 
@@ -125,6 +128,8 @@ class SessionStatusResponse(BaseModel):
     session_id: str | None = None
     agent_id: str | None = None
     channel_name: str | None = None
+    commentator_profile_id: str | None = None
+    commentator_profile_label: str | None = None
     created_at: int | None = None
     stopped_at: int | None = None
     stop_reason: str | None = None

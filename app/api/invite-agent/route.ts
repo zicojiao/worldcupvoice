@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       requester_id,
       channel_name,
       match_context,
+      commentator_profile_id,
       access_password,
     } = body;
 
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
           channel_name,
           source_mode: 'agora-gateway',
           match_context,
+          commentator_profile_id,
           agent_uid: Number(
             process.env.NEXT_PUBLIC_AGENT_UID ?? DEFAULT_AGENT_UID,
           ),

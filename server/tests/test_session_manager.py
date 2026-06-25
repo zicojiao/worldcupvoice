@@ -31,8 +31,8 @@ def _settings() -> Settings:
     return Settings(
         agora_app_id="app-id",
         agora_app_certificate="app-cert",
-            openai_api_key="openai-key",
-        )
+        openai_api_key="openai-key",
+    )
 
 
 def _guarded_settings(
@@ -89,8 +89,77 @@ async def test_start_uses_agora_gateway_mode_and_passes_media_uid(monkeypatch):
     assert response.source_mode == "agora-gateway"
     assert response.media_uid == "777"
     assert response.agent_uid == "888"
+    assert response.commentator_profile_id == "zh-cn-fish-meme"
     assert FakeCommentator.instances[0].kwargs["media_uid"] == 777
     assert "source_url" not in FakeCommentator.instances[0].kwargs
+    await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_start_uses_selected_commentator_profile(monkeypatch):
+    monkeypatch.setenv("ELEVENLABS_VOICE_ID_EN_SPORTSCASTER", "public-demo-voice")
+    monkeypatch.setattr("app.session_manager.BackendVisionCommentator", FakeCommentator)
+    manager = SessionManager(_settings())
+
+    response = await manager.start(
+        StartSessionRequest(
+            requester_id="browser-user",
+            channel_name="live-finals",
+            commentator_profile_id="en-us-sportscaster",
+        )
+    )
+
+    assert response.commentator_profile_id == "en-us-sportscaster"
+    assert response.commentator_profile_label == "English Sportscaster"
+    assert FakeCommentator.instances[0].kwargs["profile"].id == "en-us-sportscaster"
+    assert FakeCommentator.instances[0].kwargs["settings"].tts_provider == "elevenlabs"
+    assert (
+        FakeCommentator.instances[0].kwargs["settings"].elevenlabs_voice_id
+        == "public-demo-voice"
+    )
+    await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_start_uses_french_commentator_profile(monkeypatch):
+    monkeypatch.setenv("ELEVENLABS_VOICE_ID_FR_SPORTSCASTER", "french-demo-voice")
+    monkeypatch.setattr("app.session_manager.BackendVisionCommentator", FakeCommentator)
+    manager = SessionManager(_settings())
+
+    response = await manager.start(
+        StartSessionRequest(
+            requester_id="browser-user",
+            channel_name="live-finals",
+            commentator_profile_id="fr-fr-sportscaster",
+        )
+    )
+
+    assert response.commentator_profile_id == "fr-fr-sportscaster"
+    assert response.commentator_profile_label == "French Sportscaster"
+    assert FakeCommentator.instances[0].kwargs["profile"].language == "fr-FR"
+    assert FakeCommentator.instances[0].kwargs["settings"].tts_provider == "elevenlabs"
+    assert (
+        FakeCommentator.instances[0].kwargs["settings"].elevenlabs_voice_id
+        == "french-demo-voice"
+    )
+    await manager.close()
+
+
+@pytest.mark.asyncio
+async def test_profile_without_configured_voice_falls_back_to_openai(monkeypatch):
+    monkeypatch.setattr("app.session_manager.BackendVisionCommentator", FakeCommentator)
+    manager = SessionManager(_settings())
+
+    await manager.start(
+        StartSessionRequest(
+            requester_id="browser-user",
+            channel_name="live-finals",
+            commentator_profile_id="zh-cn-fish-meme",
+        )
+    )
+
+    assert FakeCommentator.instances[0].kwargs["profile"].id == "zh-cn-fish-meme"
+    assert FakeCommentator.instances[0].kwargs["settings"].tts_provider == "openai"
     await manager.close()
 
 

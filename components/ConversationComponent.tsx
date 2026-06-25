@@ -38,7 +38,19 @@ import {
 } from './QuickstartPipelineMetrics';
 import { QuickstartTranscriptPanel } from './QuickstartTranscriptPanel';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toMatchContext } from '@/lib/commentary';
+import {
+  COMMENTATOR_PROFILES,
+  DEFAULT_COMMENTATOR_PROFILE_ID,
+  type CommentatorProfileId,
+} from '@/lib/commentatorProfiles';
 import type {
   ActiveAgentSession,
   AgentErrorResponse,
@@ -135,20 +147,27 @@ function BackendSessionMonitor({
   isAiStarting,
   actionError,
   clientAudioStats,
+  selectedProfileId,
   onStartAi,
   onStopAi,
+  onProfileChange,
 }: {
   status: SessionStatusResponse | null;
   activeAgent: ActiveAgentSession | null;
   isAiStarting: boolean;
   actionError: string | null;
   clientAudioStats: ClientAudioStats | null;
+  selectedProfileId: CommentatorProfileId;
   onStartAi: () => void;
   onStopAi: () => void;
+  onProfileChange: (profileId: CommentatorProfileId) => void;
 }) {
   const events = status?.events.slice(-12).reverse() ?? [];
   const isAiRunning = Boolean(activeAgent);
   const stats = status?.stats;
+  const selectedProfile =
+    COMMENTATOR_PROFILES.find((profile) => profile.id === selectedProfileId) ??
+    COMMENTATOR_PROFILES[0];
   const metricItems = [
     ['Frames', String(stats?.frames_sampled ?? 0)],
     ['Vision', String(stats?.vision_requests ?? 0)],
@@ -174,11 +193,34 @@ function BackendSessionMonitor({
           <p className="font-semibold text-foreground">AI commentary</p>
           <p className="text-xs text-muted-foreground">
             {isAiRunning
-              ? `${status?.state ?? 'starting'} · ${status?.channel_name ? `channel ${status.channel_name}` : 'AI session active'}`
+              ? `${status?.state ?? 'starting'} · ${status?.commentator_profile_label ?? selectedProfile.label}`
               : 'Off · live video continues without AI spend'}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Commentator
+            </span>
+            <Select
+              value={selectedProfileId}
+              disabled={isAiRunning || isAiStarting}
+              onValueChange={(value) =>
+                onProfileChange(value as CommentatorProfileId)
+              }
+            >
+              <SelectTrigger className="h-8 min-w-[14rem] border-border/80 bg-background/80 px-2.5 text-xs font-semibold text-foreground shadow-sm hover:bg-accent/20">
+                <SelectValue placeholder="Select commentator" />
+              </SelectTrigger>
+              <SelectContent align="end" className="min-w-[14rem]">
+                {COMMENTATOR_PROFILES.map((profile) => (
+                  <SelectItem key={profile.id} value={profile.id} className="text-xs">
+                    {profile.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div
             className={`w-fit rounded-md border px-2.5 py-1 text-xs font-semibold ${aiSpendClass(status)}`}
           >
@@ -313,6 +355,11 @@ export default function ConversationComponent({
     useState<SessionStatusResponse | null>(null);
   const [isAiStarting, setIsAiStarting] = useState(false);
   const [aiActionError, setAiActionError] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] =
+    useState<CommentatorProfileId>(DEFAULT_COMMENTATOR_PROFILE_ID);
+  const [transcriptResetAtMs, setTranscriptResetAtMs] = useState<number | null>(
+    null,
+  );
   const [connectionIssues, setConnectionIssues] = useState<ConnectionIssue[]>(
     [],
   );
@@ -527,15 +574,30 @@ export default function ConversationComponent({
 
   const transcript = useMemo(() => {
     return normalizeTranscript(rawTranscript, String(client.uid)).filter(
-      (item) => !isVisualObservationTick(item.text),
+      (item) => {
+        if (isVisualObservationTick(item.text)) return false;
+        if (transcriptResetAtMs === null) return true;
+        if (typeof item._time !== 'number') return false;
+        return normalizeTimestampMs(item._time) >= transcriptResetAtMs;
+      },
     );
-  }, [rawTranscript, client.uid]);
+  }, [rawTranscript, client.uid, transcriptResetAtMs]);
 
   const messageList = useMemo(() => getMessageList(transcript), [transcript]);
 
   const currentInProgressMessage = useMemo(() => {
     return getCurrentInProgressMessage(transcript);
   }, [transcript]);
+
+  const handleProfileChange = useCallback(
+    (profileId: CommentatorProfileId) => {
+      if (profileId === selectedProfileId) return;
+      setSelectedProfileId(profileId);
+      setTranscriptResetAtMs(Date.now());
+      setRawTranscript([]);
+    },
+    [selectedProfileId],
+  );
 
   useClientEvent(client, 'connection-state-change', (curState) => {
     setConnectionState(curState);
@@ -605,6 +667,7 @@ export default function ConversationComponent({
           channel_name: agoraData.channel,
           source_mode: 'agora-gateway',
           match_context: toMatchContext(match),
+          commentator_profile_id: selectedProfileId,
           access_password: accessPassword,
         } as ClientStartRequest),
         cache: 'no-store',
@@ -646,6 +709,7 @@ export default function ConversationComponent({
     isAiStarting,
     isMediaFeedConnected,
     match,
+    selectedProfileId,
   ]);
 
   const handleStopAi = useCallback(async () => {
@@ -897,8 +961,10 @@ export default function ConversationComponent({
           isAiStarting={isAiStarting}
           actionError={aiActionError}
           clientAudioStats={clientAudioStats}
+          selectedProfileId={selectedProfileId}
           onStartAi={handleStartAi}
           onStopAi={handleStopAi}
+          onProfileChange={handleProfileChange}
         />
       }
       onEndConversation={handleEndConversation}

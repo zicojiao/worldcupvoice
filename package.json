@@ -17,6 +17,7 @@
     "verify": "pnpm run lint && pnpm run typecheck && pnpm run build"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.3.1",
     "@radix-ui/react-slot": "^1.1.1",
     "agora-agent-client-toolkit": "1.2.0",
     "agora-agent-uikit": "1.1.0",

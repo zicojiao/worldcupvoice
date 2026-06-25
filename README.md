@@ -69,7 +69,7 @@ Runtime roles:
 - Live AI play-by-play from the same RTC feed viewers are watching.
 - Any live source (OBS, encoder, ...) ingests through RTMP and Agora Media Gateway.
 - Server-side frame sampling for visually grounded match commentary.
-- Configurable commentator voice with OpenAI TTS or ElevenLabs.
+- Configurable commentator voice with OpenAI TTS, ElevenLabs, or Fish Audio.
 - AI audio published back into RTC with synced transcript and booth status.
 - Explicit `Start AI` / `Stop AI`, viewer heartbeat, and hard session TTL to
   control AI spend.
@@ -145,12 +145,38 @@ part of the AI commentator effect. For demos and production-style streams,
 ElevenLabs is recommended because a purpose-built sportscaster voice makes the
 commentary feel far more like a real broadcast booth.
 
+Fish Audio can also be used as the TTS provider, and is worth trying for Chinese
+commentary voices:
+
+```bash
+TTS_PROVIDER=fish_audio
+FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID_ZH_MEME=
+FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
+```
+
+The open-source project ships commentator profiles and prompts, not private
+voice IDs. Create your own Fish Audio voice and put its ID in the matching env
+variable. If neither a profile-specific nor generic third-party voice ID is configured,
+the backend falls back to OpenAI TTS so local setup still works.
+
+Built-in profile voice variables:
+
+| Profile | Provider | Voice env |
+| --- | --- | --- |
+| English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
+| French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
+| Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
+| Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
+
 Create your own ElevenLabs voice and put its voice ID in `server/.env.local`:
 
 ```bash
 TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
+ELEVENLABS_VOICE_ID_FR_SPORTSCASTER=
 ```
 
 In ElevenLabs:

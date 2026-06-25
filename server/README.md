@@ -41,7 +41,22 @@ ElevenLabs with a custom sportscaster voice:
 TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
+ELEVENLABS_VOICE_ID_FR_SPORTSCASTER=
 ```
+
+For Chinese commentary voices, Fish Audio is also supported:
+
+```bash
+TTS_PROVIDER=fish_audio
+FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID_ZH_MEME=
+FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
+```
+
+Profile voice IDs are deployment config, not source code. Your public fork can
+run without them because the backend falls back to OpenAI TTS when a selected
+third-party profile has no profile-specific or generic configured voice ID.
 
 In ElevenLabs, open **VoiceLab**, click **Create Voice**, choose **Voice
 Design**, paste the prompt below, generate and save a sportscaster voice, then
