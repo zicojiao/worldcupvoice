@@ -197,9 +197,11 @@ function BackendSessionMonitor({
               : 'Off · live video continues without AI spend'}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="grid gap-1 text-xs text-muted-foreground">
-            <span>Commentator</span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Commentator
+            </span>
             <Select
               value={selectedProfileId}
               disabled={isAiRunning || isAiStarting}
