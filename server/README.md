@@ -41,6 +41,8 @@ ElevenLabs with a custom sportscaster voice:
 TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
+ELEVENLABS_VOICE_ID_FR_SPORTSCASTER=
 ```
 
 For Chinese commentary voices, Fish Audio is also supported:

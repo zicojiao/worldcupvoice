@@ -137,6 +137,30 @@ def test_visual_prompt_can_use_chinese_commentator_profile():
     assert "13.1 秒" in prompt
 
 
+def test_visual_prompt_can_use_french_commentator_profile():
+    profile = resolve_commentator_profile("fr-fr-sportscaster")
+    prompt = _build_visual_prompt(
+        MatchContext(
+            sport="football",
+            title="Argentina vs France",
+            competition="FIFA World Cup Qatar 2022 - Final",
+            venue="Lusail Stadium",
+            homeTeam="Argentina",
+            awayTeam="France",
+            storyline="Mbappe leads France back late.",
+        ),
+        samples=[FrameSnapshot(video_time=21.4, captured_at=2.0, image_base64="new")],
+        previous_calls=["Mbappé accélère côté gauche."],
+        profile=profile,
+    )
+
+    assert "Profil du commentateur : French Sportscaster" in prompt
+    assert "phrases courtes quand ça va vite" in prompt
+    assert "Retourne exactement NO_CALL" in prompt
+    assert "Mbappé accélère côté gauche." in prompt
+    assert "21.4 s" in prompt
+
+
 def test_visual_prompt_includes_roster_map_and_identity_rules():
     prompt = _build_visual_prompt(
         MatchContext(

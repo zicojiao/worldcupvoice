@@ -57,6 +57,22 @@ COMMENTATOR_PROFILES: dict[str, CommentatorProfile] = {
             "when the picture is unclear."
         ),
     ),
+    "fr-fr-sportscaster": CommentatorProfile(
+        id="fr-fr-sportscaster",
+        label="French Sportscaster",
+        language="fr-FR",
+        transcript_language="fr",
+        tts_provider="elevenlabs",
+        voice_env="ELEVENLABS_VOICE_ID_FR_SPORTSCASTER",
+        style_prompt=(
+            "Tu es un grand commentateur français de football, dans un style de "
+            "diffusion télévisée métropolitaine. Ton énergie est explosive, urgente, "
+            "théâtrale et passionnée. Reste dans le commentaire de direct: phrases "
+            "courtes pendant les attaques, montée dramatique quand le danger arrive, "
+            "noms des joueurs nets, et explosion émotionnelle seulement si l'image "
+            "montre vraiment une occasion décisive ou un but."
+        ),
+    ),
 }
 
 

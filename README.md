@@ -167,6 +167,7 @@ Built-in profile voice variables:
 | Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
 | Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
 | English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
+| French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
 
 Create your own ElevenLabs voice and put its voice ID in `server/.env.local`:
 
@@ -175,6 +176,7 @@ TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
 ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
+ELEVENLABS_VOICE_ID_FR_SPORTSCASTER=
 ```
 
 In ElevenLabs:

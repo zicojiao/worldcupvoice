@@ -158,6 +158,7 @@ id 时，后端会自动回退到 OpenAI TTS，保证本地仍能跑通。
 | Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
 | Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
 | English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
+| French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
 
 在 ElevenLabs 里创建自己的 voice，然后把 voice ID 写到 `server/.env.local`：
 
@@ -166,6 +167,7 @@ TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
 ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
+ELEVENLABS_VOICE_ID_FR_SPORTSCASTER=
 ```
 
 在 ElevenLabs 后台：
