@@ -1,0 +1,13 @@
+node_modules
+.next
+.venv
+server/.venv
+.pytest_cache
+server/agora_rtc_log
+.git/
+.env*
+**/.env*
+**/.env.local
+*.env.local
+docs/
+*.md
