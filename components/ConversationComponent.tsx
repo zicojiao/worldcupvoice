@@ -38,6 +38,13 @@ import {
 } from './QuickstartPipelineMetrics';
 import { QuickstartTranscriptPanel } from './QuickstartTranscriptPanel';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toMatchContext } from '@/lib/commentary';
 import {
   COMMENTATOR_PROFILES,
@@ -191,23 +198,27 @@ function BackendSessionMonitor({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="grid gap-1 text-xs text-muted-foreground">
+          <div className="grid gap-1 text-xs text-muted-foreground">
             <span>Commentator</span>
-            <select
+            <Select
               value={selectedProfileId}
-              onChange={(event) =>
-                onProfileChange(event.target.value as CommentatorProfileId)
-              }
               disabled={isAiRunning || isAiStarting}
-              className="h-9 rounded-md border border-border bg-background px-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+              onValueChange={(value) =>
+                onProfileChange(value as CommentatorProfileId)
+              }
             >
-              {COMMENTATOR_PROFILES.map((profile) => (
-                <option key={profile.id} value={profile.id}>
-                  {profile.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              <SelectTrigger className="min-w-[18rem] border-border/80 bg-background/80 text-foreground shadow-sm hover:bg-accent/20">
+                <SelectValue placeholder="Select commentator" />
+              </SelectTrigger>
+              <SelectContent align="end" className="min-w-[18rem]">
+                {COMMENTATOR_PROFILES.map((profile) => (
+                  <SelectItem key={profile.id} value={profile.id}>
+                    {profile.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div
             className={`w-fit rounded-md border px-2.5 py-1 text-xs font-semibold ${aiSpendClass(status)}`}
           >
