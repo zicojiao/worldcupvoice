@@ -155,10 +155,10 @@ id 时，后端会自动回退到 OpenAI TTS，保证本地仍能跑通。
 
 | Profile | Provider | Voice env |
 | --- | --- | --- |
-| Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
-| Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
 | English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
 | French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
+| Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
+| Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
 
 在 ElevenLabs 里创建自己的 voice，然后把 voice ID 写到 `server/.env.local`：
 
