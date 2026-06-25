@@ -121,6 +121,31 @@ async def test_start_uses_selected_commentator_profile(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_start_uses_english_fish_commentator_profile(monkeypatch):
+    monkeypatch.setenv("FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER", "fish-english-voice")
+    monkeypatch.setattr("app.session_manager.BackendVisionCommentator", FakeCommentator)
+    manager = SessionManager(_settings())
+
+    response = await manager.start(
+        StartSessionRequest(
+            requester_id="browser-user",
+            channel_name="live-finals",
+            commentator_profile_id="en-us-fish-sportscaster",
+        )
+    )
+
+    assert response.commentator_profile_id == "en-us-fish-sportscaster"
+    assert response.commentator_profile_label == "English Fish Sportscaster"
+    assert FakeCommentator.instances[0].kwargs["profile"].language == "en-US"
+    assert FakeCommentator.instances[0].kwargs["settings"].tts_provider == "fish_audio"
+    assert (
+        FakeCommentator.instances[0].kwargs["settings"].fish_audio_voice_id
+        == "fish-english-voice"
+    )
+    await manager.close()
+
+
+@pytest.mark.asyncio
 async def test_start_uses_french_commentator_profile(monkeypatch):
     monkeypatch.setenv("ELEVENLABS_VOICE_ID_FR_SPORTSCASTER", "french-demo-voice")
     monkeypatch.setattr("app.session_manager.BackendVisionCommentator", FakeCommentator)

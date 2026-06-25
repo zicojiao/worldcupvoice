@@ -151,6 +151,7 @@ commentary voices:
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER=
 FISH_AUDIO_VOICE_ID_ZH_MEME=
 FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
@@ -165,6 +166,7 @@ Built-in profile voice variables:
 | Profile | Provider | Voice env |
 | --- | --- | --- |
 | English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
+| English Fish Sportscaster | Fish Audio | `FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER` |
 | French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
 | Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
 | Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |

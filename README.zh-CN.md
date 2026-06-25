@@ -143,6 +143,7 @@ OPENAI_API_KEY=
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER=
 FISH_AUDIO_VOICE_ID_ZH_MEME=
 FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
@@ -156,6 +157,7 @@ id 时，后端会自动回退到 OpenAI TTS，保证本地仍能跑通。
 | Profile | Provider | Voice env |
 | --- | --- | --- |
 | English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
+| English Fish Sportscaster | Fish Audio | `FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER` |
 | French Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_FR_SPORTSCASTER` |
 | Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
 | Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |

@@ -57,6 +57,21 @@ COMMENTATOR_PROFILES: dict[str, CommentatorProfile] = {
             "when the picture is unclear."
         ),
     ),
+    "en-us-fish-sportscaster": CommentatorProfile(
+        id="en-us-fish-sportscaster",
+        label="English Fish Sportscaster",
+        language="en-US",
+        transcript_language="en",
+        tts_provider="fish_audio",
+        voice_env="FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER",
+        style_prompt=(
+            "You are an energetic English football commentator for a live World Cup "
+            "broadcast. Call the newest visible action with fast play-by-play rhythm, "
+            "short urgent phrases during attacks, crisp player names when visually "
+            "grounded, and dramatic restraint unless the frame clearly shows a decisive "
+            "moment."
+        ),
+    ),
     "fr-fr-sportscaster": CommentatorProfile(
         id="fr-fr-sportscaster",
         label="French Sportscaster",

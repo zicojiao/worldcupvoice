@@ -50,6 +50,7 @@ For Chinese commentary voices, Fish Audio is also supported:
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID_EN_SPORTSCASTER=
 FISH_AUDIO_VOICE_ID_ZH_MEME=
 FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
