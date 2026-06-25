@@ -207,12 +207,12 @@ function BackendSessionMonitor({
                 onProfileChange(value as CommentatorProfileId)
               }
             >
-              <SelectTrigger className="min-w-[18rem] border-border/80 bg-background/80 text-foreground shadow-sm hover:bg-accent/20">
+              <SelectTrigger className="h-8 min-w-[14rem] border-border/80 bg-background/80 px-2.5 text-xs font-semibold text-foreground shadow-sm hover:bg-accent/20">
                 <SelectValue placeholder="Select commentator" />
               </SelectTrigger>
-              <SelectContent align="end" className="min-w-[18rem]">
+              <SelectContent align="end" className="min-w-[14rem]">
                 {COMMENTATOR_PROFILES.map((profile) => (
-                  <SelectItem key={profile.id} value={profile.id}>
+                  <SelectItem key={profile.id} value={profile.id} className="text-xs">
                     {profile.label}
                   </SelectItem>
                 ))}
