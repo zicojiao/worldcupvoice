@@ -63,7 +63,7 @@ flowchart LR
 - 基于观众正在观看的同一路 RTC 直播画面生成 AI 解说。
 - 任意直播源（OBS、编码器等）通过 RTMP 和 Agora Media Gateway 接入。
 - 后端采样实时画面，让解说基于当前比赛内容。
-- 可配置 OpenAI TTS 或 ElevenLabs 解说音色。
+- 可配置 OpenAI TTS、ElevenLabs 或 Fish Audio 解说音色。
 - AI 声音回推到 RTC，并在前端同步展示解说文字和解说间状态。
 - 显式 `Start AI` / `Stop AI`、观众心跳和最大会话时长，避免后台持续消耗
   AI token。
@@ -137,6 +137,14 @@ OPENAI_API_KEY=
 默认 OpenAI TTS 可以跑通项目，但声音很大程度决定了 AI 解说的最终效果。对于 demo
 和更接近 production 的直播，推荐使用 ElevenLabs：自己生成一个体育解说风格的 voice，
 会比通用 TTS 更像真实转播间。
+
+如果你更关注中文解说音色，也可以试 Fish Audio：
+
+```bash
+TTS_PROVIDER=fish_audio
+FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+```
 
 在 ElevenLabs 里创建自己的 voice，然后把 voice ID 写到 `server/.env.local`：
 

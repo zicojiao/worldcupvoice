@@ -31,6 +31,16 @@ class Settings(BaseModel):
     elevenlabs_speed: float = 1.12
     elevenlabs_use_speaker_boost: bool = True
     elevenlabs_streaming: bool = True
+    fish_audio_api_key: str | None = None
+    fish_audio_voice_id: str | None = "54a5170264694bfc8e9ad98df7bd89c3"
+    fish_audio_model: str = "s2-pro"
+    fish_audio_format: str = "pcm"
+    fish_audio_sample_rate: int | None = None
+    fish_audio_latency: str = "balanced"
+    fish_audio_chunk_length: int = 150
+    fish_audio_speed: float = 1.0
+    fish_audio_volume: float = 0.0
+    fish_audio_normalize_loudness: bool = True
     agent_uid: int = 123456
     match_feed_uid: int = 234567
     token_expire_seconds: int = 3600
@@ -53,7 +63,7 @@ class Settings(BaseModel):
 def get_settings() -> Settings:
     app_id = _first_env("AGORA_APP_ID", "NEXT_PUBLIC_AGORA_APP_ID")
     app_certificate = _first_env("AGORA_APP_CERTIFICATE", "NEXT_AGORA_APP_CERTIFICATE")
-    tts_provider = os.getenv("TTS_PROVIDER", "openai").lower()
+    tts_provider = os.getenv("TTS_PROVIDER", "openai").lower().replace("-", "_")
     elevenlabs_output_format = os.getenv("ELEVENLABS_OUTPUT_FORMAT", "pcm_24000")
     commentary_audio_sample_rate = int(os.getenv("COMMENTARY_AUDIO_SAMPLE_RATE", "24000"))
     commentary_audio_safe_mode = (
@@ -92,6 +102,24 @@ def get_settings() -> Settings:
         elevenlabs_use_speaker_boost=os.getenv("ELEVENLABS_USE_SPEAKER_BOOST", "true").lower()
         not in {"0", "false", "no"},
         elevenlabs_streaming=os.getenv("ELEVENLABS_STREAMING", "true").lower()
+        not in {"0", "false", "no"},
+        fish_audio_api_key=os.getenv("FISH_AUDIO_API_KEY"),
+        fish_audio_voice_id=os.getenv(
+            "FISH_AUDIO_VOICE_ID",
+            "54a5170264694bfc8e9ad98df7bd89c3",
+        ),
+        fish_audio_model=os.getenv("FISH_AUDIO_MODEL", "s2-pro"),
+        fish_audio_format=os.getenv("FISH_AUDIO_FORMAT", "pcm").lower(),
+        fish_audio_sample_rate=int(
+            os.getenv("FISH_AUDIO_SAMPLE_RATE", str(commentary_audio_sample_rate))
+        ),
+        fish_audio_latency=os.getenv("FISH_AUDIO_LATENCY", "balanced"),
+        fish_audio_chunk_length=int(os.getenv("FISH_AUDIO_CHUNK_LENGTH", "150")),
+        fish_audio_speed=float(os.getenv("FISH_AUDIO_SPEED", "1.0")),
+        fish_audio_volume=float(os.getenv("FISH_AUDIO_VOLUME", "0")),
+        fish_audio_normalize_loudness=os.getenv(
+            "FISH_AUDIO_NORMALIZE_LOUDNESS", "true"
+        ).lower()
         not in {"0", "false", "no"},
         agent_uid=int(os.getenv("AGENT_UID", os.getenv("NEXT_PUBLIC_AGENT_UID", "123456"))),
         match_feed_uid=int(os.getenv("MATCH_FEED_UID", "234567")),

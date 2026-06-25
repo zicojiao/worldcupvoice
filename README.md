@@ -69,7 +69,7 @@ Runtime roles:
 - Live AI play-by-play from the same RTC feed viewers are watching.
 - Any live source (OBS, encoder, ...) ingests through RTMP and Agora Media Gateway.
 - Server-side frame sampling for visually grounded match commentary.
-- Configurable commentator voice with OpenAI TTS or ElevenLabs.
+- Configurable commentator voice with OpenAI TTS, ElevenLabs, or Fish Audio.
 - AI audio published back into RTC with synced transcript and booth status.
 - Explicit `Start AI` / `Stop AI`, viewer heartbeat, and hard session TTL to
   control AI spend.
@@ -144,6 +144,15 @@ The default OpenAI TTS path is enough to run the project, but the voice is a big
 part of the AI commentator effect. For demos and production-style streams,
 ElevenLabs is recommended because a purpose-built sportscaster voice makes the
 commentary feel far more like a real broadcast booth.
+
+Fish Audio can also be used as the TTS provider, and is worth trying for Chinese
+commentary voices:
+
+```bash
+TTS_PROVIDER=fish_audio
+FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+```
 
 Create your own ElevenLabs voice and put its voice ID in `server/.env.local`:
 

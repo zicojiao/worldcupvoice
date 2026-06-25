@@ -43,6 +43,14 @@ ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
 ```
 
+For Chinese commentary voices, Fish Audio is also supported:
+
+```bash
+TTS_PROVIDER=fish_audio
+FISH_AUDIO_API_KEY=
+FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+```
+
 In ElevenLabs, open **VoiceLab**, click **Create Voice**, choose **Voice
 Design**, paste the prompt below, generate and save a sportscaster voice, then
 copy its **Voice ID** into `ELEVENLABS_VOICE_ID`.

@@ -211,6 +211,93 @@ def test_tts_description_reports_elevenlabs_provider():
     assert commentator._tts_description() == "elevenlabs:eleven_flash_v2_5:voice-id"
 
 
+def test_tts_description_reports_fish_audio_provider():
+    commentator = BackendVisionCommentator(
+        settings=Settings(
+            agora_app_id="app-id",
+            agora_app_certificate="app-cert",
+            tts_provider="fish_audio",
+            fish_audio_voice_id="fish-voice",
+            fish_audio_model="s2-pro",
+        ),
+        channel_name="channel",
+        agent_uid=123456,
+        match_context=None,
+        media_uid=234567,
+    )
+
+    assert commentator._tts_description() == "fish_audio:s2-pro:fish-voice"
+
+
+@pytest.mark.asyncio
+async def test_fish_audio_tts_posts_pcm_request(monkeypatch):
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        content = b"x" * 480
+
+        def raise_for_status(self) -> None:
+            return None
+
+    class FakeAsyncClient:
+        def __init__(self, *, timeout: int):
+            captured["timeout"] = timeout
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, _exc_type, _exc, _tb):
+            return None
+
+        async def post(self, url: str, *, headers: dict, json: dict):
+            captured["url"] = url
+            captured["headers"] = headers
+            captured["json"] = json
+            return FakeResponse()
+
+    monkeypatch.setattr("app.backend_commentator.httpx.AsyncClient", FakeAsyncClient)
+    commentator = BackendVisionCommentator(
+        settings=Settings(
+            agora_app_id="app-id",
+            agora_app_certificate="app-cert",
+            tts_provider="fish_audio",
+            fish_audio_api_key="fish-key",
+            fish_audio_voice_id="54a5170264694bfc8e9ad98df7bd89c3",
+            fish_audio_model="s2-pro",
+            fish_audio_format="pcm",
+            fish_audio_sample_rate=24000,
+            fish_audio_latency="balanced",
+            fish_audio_chunk_length=150,
+            fish_audio_speed=1.08,
+            commentary_audio_sample_rate=24000,
+        ),
+        channel_name="channel",
+        agent_uid=123456,
+        match_context=None,
+        media_uid=234567,
+    )
+
+    pcm = await commentator._synthesize_speech_fish_audio("梅西带球推进。")
+
+    assert pcm == b"x" * 480
+    assert captured["url"] == "https://api.fish.audio/v1/tts"
+    assert captured["timeout"] == 35
+    headers = captured["headers"]
+    assert headers["Authorization"] == "Bearer fish-key"
+    assert headers["Content-Type"] == "application/json"
+    assert headers["model"] == "s2-pro"
+    body = captured["json"]
+    assert body["text"] == "梅西带球推进。"
+    assert body["reference_id"] == "54a5170264694bfc8e9ad98df7bd89c3"
+    assert body["format"] == "pcm"
+    assert body["sample_rate"] == 24000
+    assert body["latency"] == "balanced"
+    assert body["chunk_length"] == 150
+    assert body["prosody"]["speed"] == 1.08
+    assert body["prosody"]["normalize_loudness"] is True
+    assert commentator.stats().tts_requests == 1
+
+
 @pytest.mark.asyncio
 async def test_publish_audio_sends_pcm_frames_sequentially():
     commentator = BackendVisionCommentator(

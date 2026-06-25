@@ -67,6 +67,34 @@ def test_settings_accept_elevenlabs_tts_env(monkeypatch):
     get_settings.cache_clear()
 
 
+def test_settings_accept_fish_audio_tts_env(monkeypatch):
+    get_settings.cache_clear()
+    monkeypatch.setenv("NEXT_PUBLIC_AGORA_APP_ID", "app-id")
+    monkeypatch.setenv("NEXT_AGORA_APP_CERTIFICATE", "app-cert")
+    monkeypatch.setenv("TTS_PROVIDER", "fish-audio")
+    monkeypatch.setenv("FISH_AUDIO_API_KEY", "fish-key")
+    monkeypatch.setenv("FISH_AUDIO_VOICE_ID", "fish-voice")
+    monkeypatch.setenv("FISH_AUDIO_MODEL", "s2-pro")
+    monkeypatch.setenv("FISH_AUDIO_SAMPLE_RATE", "24000")
+    monkeypatch.setenv("FISH_AUDIO_LATENCY", "balanced")
+    monkeypatch.setenv("FISH_AUDIO_CHUNK_LENGTH", "150")
+    monkeypatch.setenv("FISH_AUDIO_SPEED", "1.08")
+
+    settings = get_settings()
+
+    assert settings.tts_provider == "fish_audio"
+    assert settings.fish_audio_api_key == "fish-key"
+    assert settings.fish_audio_voice_id == "fish-voice"
+    assert settings.fish_audio_model == "s2-pro"
+    assert settings.fish_audio_format == "pcm"
+    assert settings.fish_audio_sample_rate == 24000
+    assert settings.fish_audio_latency == "balanced"
+    assert settings.fish_audio_chunk_length == 150
+    assert settings.fish_audio_speed == 1.08
+
+    get_settings.cache_clear()
+
+
 def test_elevenlabs_safe_mode_prefers_agora_stable_pcm(monkeypatch):
     get_settings.cache_clear()
     monkeypatch.setenv("NEXT_PUBLIC_AGORA_APP_ID", "app-id")

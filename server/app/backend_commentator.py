@@ -34,6 +34,7 @@ class _TtsStreamResult:
 OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses"
 OPENAI_SPEECH_URL = "https://api.openai.com/v1/audio/speech"
 ELEVENLABS_SPEECH_URL = "https://api.elevenlabs.io/v1/text-to-speech"
+FISH_AUDIO_SPEECH_URL = "https://api.fish.audio/v1/tts"
 PCM_CHANNELS = 1
 PCM_BYTES_PER_SAMPLE = 2
 TRANSCRIPT_TURN_END = 1
@@ -1334,6 +1335,19 @@ class BackendVisionCommentator:
                 logger.warning(
                     "TTS_PROVIDER=elevenlabs requires ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID; falling back to OpenAI TTS"
                 )
+        if self._settings.tts_provider in {"fish_audio", "fishaudio", "fish"}:
+            if self._settings.fish_audio_api_key and self._settings.fish_audio_voice_id:
+                try:
+                    return await self._synthesize_speech_fish_audio(text)
+                except Exception:
+                    logger.warning(
+                        "Fish Audio TTS failed; falling back to OpenAI TTS",
+                        exc_info=True,
+                    )
+            else:
+                logger.warning(
+                    "TTS_PROVIDER=fish_audio requires FISH_AUDIO_API_KEY and FISH_AUDIO_VOICE_ID; falling back to OpenAI TTS"
+                )
 
         return await self._synthesize_speech_openai(text)
 
@@ -1516,9 +1530,63 @@ class BackendVisionCommentator:
                 target_rate=self._settings.commentary_audio_sample_rate,
             )
 
+    async def _synthesize_speech_fish_audio(self, text: str) -> bytes:
+        if self._settings.fish_audio_format != "pcm":
+            raise RuntimeError("FISH_AUDIO_FORMAT must be pcm for Agora audio publishing.")
+        if not self._settings.fish_audio_api_key:
+            raise RuntimeError("FISH_AUDIO_API_KEY is required for Fish Audio commentary audio.")
+        if not self._settings.fish_audio_voice_id:
+            raise RuntimeError("FISH_AUDIO_VOICE_ID is required for Fish Audio commentary audio.")
+
+        source_rate = (
+            self._settings.fish_audio_sample_rate
+            or self._settings.commentary_audio_sample_rate
+        )
+        async with httpx.AsyncClient(timeout=35) as client:
+            response = await client.post(
+                FISH_AUDIO_SPEECH_URL,
+                headers={
+                    "Authorization": f"Bearer {self._settings.fish_audio_api_key}",
+                    "Content-Type": "application/json",
+                    "model": self._settings.fish_audio_model,
+                },
+                json={
+                    "text": text,
+                    "reference_id": self._settings.fish_audio_voice_id,
+                    "format": self._settings.fish_audio_format,
+                    "sample_rate": source_rate,
+                    "latency": self._settings.fish_audio_latency,
+                    "chunk_length": self._settings.fish_audio_chunk_length,
+                    "normalize": True,
+                    "prosody": {
+                        "speed": self._settings.fish_audio_speed,
+                        "volume": self._settings.fish_audio_volume,
+                        "normalize_loudness": self._settings.fish_audio_normalize_loudness,
+                    },
+                },
+            )
+            response.raise_for_status()
+            self._tts_requests += 1
+            self._last_audio_at = int(time.time())
+            logger.info(
+                "Generated Fish Audio commentary audio bytes=%s voice=%s model=%s source_rate=%s target_rate=%s",
+                len(response.content),
+                self._settings.fish_audio_voice_id,
+                self._settings.fish_audio_model,
+                source_rate,
+                self._settings.commentary_audio_sample_rate,
+            )
+            return _resample_pcm_mono(
+                response.content,
+                source_rate=source_rate,
+                target_rate=self._settings.commentary_audio_sample_rate,
+            )
+
     def _tts_description(self) -> str:
         if self._settings.tts_provider == "elevenlabs":
             return f"elevenlabs:{self._settings.elevenlabs_model}:{self._settings.elevenlabs_voice_id}"
+        if self._settings.tts_provider in {"fish_audio", "fishaudio", "fish"}:
+            return f"fish_audio:{self._settings.fish_audio_model}:{self._settings.fish_audio_voice_id}"
         return f"openai:{self._settings.openai_tts_model}:{self._settings.openai_tts_voice}"
 
     async def _publish_transcript(self, connection: object, text: str) -> None:
