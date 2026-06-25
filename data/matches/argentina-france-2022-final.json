@@ -1,0 +1,89 @@
+{
+  "id": "argentina-france-2022-final",
+  "sport": "football",
+  "title": "FIFA World Cup Uncut | Mbappe and Those Dramatic Minutes | Argentina vs France (2022 Final)",
+  "competition": "FIFA World Cup Qatar 2022 - Final",
+  "venue": "Lusail Stadium",
+  "homeTeam": "Argentina",
+  "awayTeam": "France",
+  "gameDate": "2022-12-18",
+  "localTipTime": "6:00 PM AST",
+  "finalScore": "Argentina 3, France 3 - Argentina won 4-2 on penalties",
+  "homeTeamAbbr": "ARG",
+  "awayTeamAbbr": "FRA",
+  "homeJerseyColor": "white and sky-blue striped Argentina shirts with white shorts",
+  "awayJerseyColor": "navy France shirts with navy shorts",
+  "homeRoster": [
+    { "number": "23", "name": "Emiliano Martinez", "shortName": "Martinez", "role": "starter", "position": "GK" },
+    { "number": "26", "name": "Nahuel Molina", "shortName": "Molina", "role": "starter", "position": "RB" },
+    { "number": "13", "name": "Cristian Romero", "shortName": "Romero", "role": "starter", "position": "CB" },
+    { "number": "19", "name": "Nicolas Otamendi", "shortName": "Otamendi", "role": "starter", "position": "CB" },
+    { "number": "3", "name": "Nicolas Tagliafico", "shortName": "Tagliafico", "role": "starter", "position": "LB" },
+    { "number": "7", "name": "Rodrigo De Paul", "shortName": "De Paul", "role": "starter", "position": "CM" },
+    { "number": "24", "name": "Enzo Fernandez", "shortName": "Enzo", "role": "starter", "position": "CM" },
+    { "number": "20", "name": "Alexis Mac Allister", "shortName": "Mac Allister", "role": "starter", "position": "CM" },
+    {
+      "number": "11",
+      "name": "Angel Di Maria",
+      "shortName": "Di Maria",
+      "role": "starter",
+      "position": "LW",
+      "notes": "Won the first-half penalty and scored Argentina second goal."
+    },
+    {
+      "number": "10",
+      "name": "Lionel Messi",
+      "shortName": "Messi",
+      "role": "starter",
+      "position": "FW",
+      "notes": "Argentina captain and central playmaker."
+    },
+    { "number": "9", "name": "Julian Alvarez", "shortName": "Alvarez", "role": "starter", "position": "ST" },
+    { "number": "8", "name": "Marcos Acuna", "shortName": "Acuna", "role": "bench", "position": "LB" },
+    { "number": "5", "name": "Leandro Paredes", "shortName": "Paredes", "role": "bench", "position": "CM" },
+    { "number": "22", "name": "Lautaro Martinez", "shortName": "Lautaro", "role": "bench", "position": "ST" },
+    { "number": "21", "name": "Paulo Dybala", "shortName": "Dybala", "role": "bench", "position": "FW" },
+    { "number": "4", "name": "Gonzalo Montiel", "shortName": "Montiel", "role": "bench", "position": "RB" }
+  ],
+  "awayRoster": [
+    { "number": "1", "name": "Hugo Lloris", "shortName": "Lloris", "role": "starter", "position": "GK" },
+    { "number": "5", "name": "Jules Kounde", "shortName": "Kounde", "role": "starter", "position": "RB" },
+    { "number": "4", "name": "Raphael Varane", "shortName": "Varane", "role": "starter", "position": "CB" },
+    { "number": "18", "name": "Dayot Upamecano", "shortName": "Upamecano", "role": "starter", "position": "CB" },
+    { "number": "22", "name": "Theo Hernandez", "shortName": "Theo", "role": "starter", "position": "LB" },
+    { "number": "8", "name": "Aurelien Tchouameni", "shortName": "Tchouameni", "role": "starter", "position": "DM" },
+    { "number": "14", "name": "Adrien Rabiot", "shortName": "Rabiot", "role": "starter", "position": "CM" },
+    { "number": "7", "name": "Antoine Griezmann", "shortName": "Griezmann", "role": "starter", "position": "AM" },
+    { "number": "11", "name": "Ousmane Dembele", "shortName": "Dembele", "role": "starter", "position": "RW" },
+    {
+      "number": "10",
+      "name": "Kylian Mbappe",
+      "shortName": "Mbappe",
+      "role": "starter",
+      "position": "LW",
+      "notes": "Scored a late hat-trick, including two goals in two minutes."
+    },
+    { "number": "9", "name": "Olivier Giroud", "shortName": "Giroud", "role": "starter", "position": "ST" },
+    { "number": "12", "name": "Randal Kolo Muani", "shortName": "Kolo Muani", "role": "bench", "position": "ST" },
+    { "number": "26", "name": "Marcus Thuram", "shortName": "Thuram", "role": "bench", "position": "LW" },
+    { "number": "20", "name": "Kingsley Coman", "shortName": "Coman", "role": "bench", "position": "RW" },
+    { "number": "25", "name": "Eduardo Camavinga", "shortName": "Camavinga", "role": "bench", "position": "CM/LB" },
+    { "number": "24", "name": "Ibrahima Konate", "shortName": "Konate", "role": "bench", "position": "CB" }
+  ],
+  "playerIdentificationNotes": [
+    "Use player names only when the shirt number, team kit, body context, or repeated possession context is visually clear.",
+    "If the number is not readable, say the role instead: Argentina winger, Argentina midfielder, France forward, France fullback, goalkeeper, referee, ball carrier.",
+    "Argentina wear white and sky-blue stripes; France wear navy. Do not mix teams when names and numbers are unclear.",
+    "Messi is Argentina #10 in the striped kit. Mbappe is France #10 in the navy kit. Name them only when kit or context is visually clear.",
+    "This clip focuses on the dramatic late minutes of the 2022 final; do not announce future goals or the penalty shootout unless the visible action supports it."
+  ],
+  "broadcastNotes": [
+    "Use football vocabulary: penalty area, touchline, cross, press, counter, save, volley, clearance, equaliser, attack, extra time.",
+    "Do not use basketball terms such as court, possession reset, dribble in the lane, tip-off, rebound, screen, or three-pointer.",
+    "Keep calls short and live: 4 to 12 words, one sentence, broadcast cadence.",
+    "The source feed should arrive through Agora Media Gateway as live RTC video, not as a browser-captured local file.",
+    "The key story is France coming alive late behind Mbappe after Argentina controlled much of the match."
+  ],
+  "posterUrl": "/worldcup-final-poster.jpg",
+  "storyline": "Lusail, December 18, 2022: Argentina led France before Kylian Mbappe dragged the final into chaos with a rapid late surge. WorldCupVoice adds AI live commentary over the raw broadcast feel."
+}

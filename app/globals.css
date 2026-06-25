@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light theme (default). Dark tokens apply when the OS prefers dark mode. */
+:root {
+  color-scheme: light;
+
+  /* --- Agora light token set --- */
+
+  /* Backgrounds */
+  --background:       220 20% 98%;
+  --surface:          220 18% 96%;
+  --surface-elevated: 220 16% 94%;
+
+  /* Semantic surface aliases */
+  --card:             0 0% 100%;
+  --card-foreground:  220 25% 12%;
+  --popover:          0 0% 100%;
+  --popover-foreground: 220 25% 12%;
+  --muted:            220 14% 94%;
+
+  /* Borders / inputs */
+  --border:           220 13% 88%;
+  --input:            220 13% 88%;
+
+  /* Foreground */
+  --foreground:       220 25% 12%;
+  --muted-foreground: 220 10% 42%;
+
+  /* Brand — Agora cyan */
+  --primary:            194 100% 42%;
+  --primary-foreground: 220 25% 12%;
+
+  /* Secondary — quiet surface-level control */
+  --secondary:            220 14% 94%;
+  --secondary-foreground: 220 25% 12%;
+
+  /* Accent — same hue as primary */
+  --accent:            194 100% 42%;
+  --accent-foreground: 220 25% 12%;
+
+  /* Destructive — end call, error states only */
+  --destructive:            0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Focus ring */
+  --ring: 194 100% 42%;
+
+  /* Radius base (8px) */
+  --radius: 0.5rem;
+
+  /* Charts */
+  --chart-1: 194 100% 42%;
+  --chart-2: 220 10% 45%;
+  --chart-3: 220 10% 35%;
+  --chart-4: 0 72% 52%;
+  --chart-5: 150 50% 40%;
+
+  /* Sidebar */
+  --sidebar-background:         0 0% 100%;
+  --sidebar-foreground:         220 25% 12%;
+  --sidebar-primary:            194 100% 42%;
+  --sidebar-primary-foreground: 220 25% 12%;
+  --sidebar-accent:             220 14% 94%;
+  --sidebar-accent-foreground:  220 25% 12%;
+  --sidebar-border:             220 13% 88%;
+  --sidebar-ring:               194 100% 42%;
+
+  /*
+   * AgentVisualizer: same order as dark — cool/primary at bar bottom, soft mid, purple at top.
+   * Light: blue ≈ cyan role; dark: overridden below (cyan → soft → purple).
+   */
+  --viz-stop-1: 225 92% 50%;
+  --viz-stop-2: 220 14% 78%;
+  --viz-stop-3: 285 58% 48%;
+
+  /* Font */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    /* --- Agora dark token set --- */
+
+    --background:       220 14% 5%;
+    --surface:          220 12% 9%;
+    --surface-elevated: 220 10% 13%;
+
+    --card:             220 12% 9%;
+    --card-foreground:  220 15% 95%;
+    --popover:          220 10% 13%;
+    --popover-foreground: 220 15% 95%;
+    --muted:            220 12% 9%;
+
+    --border:           220 10% 18%;
+    --input:            220 10% 18%;
+
+    --foreground:       220 15% 95%;
+    --muted-foreground: 220 10% 50%;
+
+    --primary:            194 100% 50%;
+    --primary-foreground: 220 14% 5%;
+
+    --secondary:            220 10% 13%;
+    --secondary-foreground: 220 15% 95%;
+
+    --accent:            194 100% 50%;
+    --accent-foreground: 220 14% 5%;
+
+    --destructive:            0 72% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --ring: 194 100% 50%;
+
+    --chart-1: 194 100% 50%;
+    --chart-2: 220 10% 60%;
+    --chart-3: 220 10% 40%;
+    --chart-4: 0 72% 58%;
+    --chart-5: 150 60% 45%;
+
+    --sidebar-background:         220 12% 9%;
+    --sidebar-foreground:         220 15% 95%;
+    --sidebar-primary:            194 100% 50%;
+    --sidebar-primary-foreground: 220 14% 5%;
+    --sidebar-accent:             220 10% 13%;
+    --sidebar-accent-foreground:  220 15% 95%;
+    --sidebar-border:             220 10% 18%;
+    --sidebar-ring:               194 100% 50%;
+
+    /* Agent visualizer accent ramp used by the current conversation UI. */
+    --viz-stop-1: 194 100% 58%;
+    --viz-stop-2: 215 42% 72%;
+    --viz-stop-3: 272 62% 72%;
+  }
+}
+
+/*
+ * Force the dark token set regardless of OS color scheme. Applied to the live
+ * session shell so the in-call UI stays in the immersive broadcast theme.
+ */
+.theme-dark {
+  color-scheme: dark;
+
+  --background:       220 14% 5%;
+  --surface:          220 12% 9%;
+  --surface-elevated: 220 10% 13%;
+
+  --card:             220 12% 9%;
+  --card-foreground:  220 15% 95%;
+  --popover:          220 10% 13%;
+  --popover-foreground: 220 15% 95%;
+  --muted:            220 12% 9%;
+
+  --border:           220 10% 18%;
+  --input:            220 10% 18%;
+
+  --foreground:       220 15% 95%;
+  --muted-foreground: 220 10% 60%;
+
+  --primary:            194 100% 50%;
+  --primary-foreground: 220 14% 5%;
+
+  --secondary:            220 10% 13%;
+  --secondary-foreground: 220 15% 95%;
+
+  --accent:            194 100% 50%;
+  --accent-foreground: 220 14% 5%;
+
+  --destructive:            0 72% 58%;
+  --destructive-foreground: 0 0% 100%;
+
+  --ring: 194 100% 50%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+}
+
+/* --- Entry animations --- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-up-d1 { animation-delay: 60ms; }
+.animate-fade-up-d2 { animation-delay: 120ms; }
+.animate-fade-up-d3 { animation-delay: 180ms; }
+
+/* --- Pre-call broadcast lobby ("the booth") --- */
+
+/*
+ * Control-room stage: a studio key light from the top, two cyan signal glows
+ * bleeding in from the edges, and a faint waveform-monitor scanline texture.
+ * All layers are fixed so the stage stays put while the page scrolls over it.
+ */
+.booth-stage {
+  background-color: #04070c;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(255, 255, 255, 0.014) 3px 4px
+    ),
+    radial-gradient(38% 42% at 12% 18%, hsl(194 100% 48% / 0.12), transparent 70%),
+    radial-gradient(34% 46% at 88% 80%, hsl(194 100% 48% / 0.1), transparent 72%),
+    radial-gradient(125% 90% at 50% -12%, #0b1a28 0%, #060c14 48%, #04070c 100%);
+  background-attachment: fixed, fixed, fixed, fixed;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+}
+
+/* Connector rail with a cyan pulse that sweeps from one signal stage to the next. */
+.signal-link {
+  background-color: hsl(194 100% 50% / 0.18);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    hsl(194 100% 62% / 0.95),
+    transparent
+  );
+  background-size: 45% 100%;
+  background-repeat: no-repeat;
+  background-position: -45% 0;
+}
+
+@keyframes signal-sweep {
+  to {
+    background-position: 145% 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .signal-link {
+    animation: signal-sweep 2.4s linear infinite;
+  }
+}

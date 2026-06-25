@@ -1,0 +1,32 @@
+{
+  "id": "your-match-id",
+  "sport": "football",
+  "title": "Your match title shown in the booth",
+  "competition": "Competition / round",
+  "venue": "Stadium",
+  "homeTeam": "Home team",
+  "awayTeam": "Away team",
+  "gameDate": "YYYY-MM-DD",
+  "localTipTime": "Kick-off / clip start time",
+  "finalScore": "Private metadata only. Do NOT announce as live score.",
+  "homeTeamAbbr": "HOME",
+  "awayTeamAbbr": "AWAY",
+  "homeJerseyColor": "Describe the home kit so the AI can tell teams apart",
+  "awayJerseyColor": "Describe the away kit so the AI can tell teams apart",
+  "homeRoster": [
+    { "number": "10", "name": "Full Name", "shortName": "Name", "role": "starter", "position": "FW", "notes": "Optional hint about this player" }
+  ],
+  "awayRoster": [
+    { "number": "9", "name": "Full Name", "shortName": "Name", "role": "starter", "position": "ST" }
+  ],
+  "playerIdentificationNotes": [
+    "Tell the AI how to name players: use names only when the shirt number or kit is clearly visible, otherwise use roles.",
+    "Describe each team's kit colors so the AI does not mix them up."
+  ],
+  "broadcastNotes": [
+    "Set the vocabulary and cadence (short live play-by-play, one sentence).",
+    "Describe the situation at the start of your clip."
+  ],
+  "posterUrl": "/worldcup-final-poster.jpg",
+  "storyline": "One or two sentences describing the moment your clip captures."
+}
