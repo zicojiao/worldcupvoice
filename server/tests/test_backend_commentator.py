@@ -433,6 +433,44 @@ async def test_publish_audio_queues_to_audio_consumer_pacer_when_available():
 
 
 @pytest.mark.asyncio
+async def test_wait_for_audio_drain_waits_until_pacer_buffer_is_low():
+    commentator = BackendVisionCommentator(
+        settings=Settings(
+            agora_app_id="app-id",
+            agora_app_certificate="app-cert",
+            commentary_audio_drain_target_ms=250,
+            commentary_audio_drain_timeout_ms=2000,
+        ),
+        channel_name="channel",
+        agent_uid=123456,
+        match_context=None,
+        media_uid=234567,
+    )
+
+    class FakePacer:
+        def __init__(self):
+            self.readings = [1200, 700, 200]
+
+        def buffer_ms(self) -> int:
+            if len(self.readings) > 1:
+                return self.readings.pop(0)
+            return self.readings[0]
+
+    sleeps: list[float] = []
+
+    async def fake_sleep(delay: float) -> None:
+        sleeps.append(delay)
+
+    commentator._audio_pacer = FakePacer()  # type: ignore[assignment]
+    commentator._sleep_until_stop = fake_sleep  # type: ignore[method-assign]
+
+    waited_ms = await commentator._wait_for_audio_drain(turn_id=7)
+
+    assert waited_ms >= 0
+    assert sleeps == [0.1]
+
+
+@pytest.mark.asyncio
 async def test_agora_audio_consumer_pacer_buffers_and_consumes_tts_pcm():
     class FakeSender:
         def __init__(self):

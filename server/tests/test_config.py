@@ -22,6 +22,8 @@ def test_settings_accept_next_env_aliases(monkeypatch):
     assert settings.commentary_audio_sample_rate == 24000
     assert settings.commentary_audio_consume_interval_ms == 60
     assert settings.commentary_audio_backlog_limit_ms == 2500
+    assert settings.commentary_audio_drain_target_ms == 250
+    assert settings.commentary_audio_drain_timeout_ms == 8000
     assert settings.commentary_audio_keepalive is False
     assert settings.elevenlabs_speed == 1.12
     assert settings.live_session_max_seconds == 900

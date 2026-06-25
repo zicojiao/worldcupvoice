@@ -1247,9 +1247,10 @@ class BackendVisionCommentator:
                     await self._buffered_synth_and_publish(connection, text)
                 )
             audio_publish_ms = int((time.monotonic() - audio_started_at) * 1000)
+            audio_drain_ms = await self._wait_for_audio_drain(turn_id=turn_id)
             logger.info(
                 "AI_AUDIO_PIPELINE channel=%s turn=%s describe_ms=%s transcript_ms=%s "
-                "tts_ms=%s audio_publish_ms=%s total_ms=%s pcm_bytes=%s sent_bytes=%s "
+                "tts_ms=%s audio_publish_ms=%s audio_drain_ms=%s total_ms=%s pcm_bytes=%s sent_bytes=%s "
                 "pcm_ms=%s text_len=%s text=%r",
                 self._channel_name,
                 turn_id,
@@ -1257,6 +1258,7 @@ class BackendVisionCommentator:
                 transcript_ms,
                 tts_ms,
                 audio_publish_ms,
+                audio_drain_ms,
                 int((time.monotonic() - pipeline_started_at) * 1000),
                 pcm_bytes,
                 sent_bytes,
@@ -1288,6 +1290,54 @@ class BackendVisionCommentator:
             )
         self._vision_rate_limit_resume_at = time.monotonic() + delay
         logger.warning("OpenAI vision rate limited; pausing commentary for %.1fs", delay)
+
+    async def _wait_for_audio_drain(self, *, turn_id: int) -> int:
+        if self._audio_pacer is None:
+            return 0
+
+        target_ms = max(0, self._settings.commentary_audio_drain_target_ms)
+        timeout_ms = max(0, self._settings.commentary_audio_drain_timeout_ms)
+        if timeout_ms == 0:
+            return 0
+
+        started_at = time.monotonic()
+        start_buffer_ms = self._audio_pacer.buffer_ms()
+        final_buffer_ms = start_buffer_ms
+        while not self._stop.is_set():
+            final_buffer_ms = self._audio_pacer.buffer_ms()
+            if final_buffer_ms <= target_ms:
+                break
+
+            elapsed_ms = int((time.monotonic() - started_at) * 1000)
+            remaining_ms = timeout_ms - elapsed_ms
+            if remaining_ms <= 0:
+                logger.warning(
+                    "AI_AUDIO_DRAIN_TIMEOUT channel=%s turn=%s start_buffer_ms=%s "
+                    "final_buffer_ms=%s target_ms=%s timeout_ms=%s",
+                    self._channel_name,
+                    turn_id,
+                    start_buffer_ms,
+                    final_buffer_ms,
+                    target_ms,
+                    timeout_ms,
+                )
+                break
+
+            await self._sleep_until_stop(min(0.1, remaining_ms / 1000))
+
+        waited_ms = int((time.monotonic() - started_at) * 1000)
+        if waited_ms > 0 or start_buffer_ms > target_ms:
+            logger.info(
+                "AI_AUDIO_DRAIN_WAIT channel=%s turn=%s start_buffer_ms=%s "
+                "final_buffer_ms=%s target_ms=%s waited_ms=%s",
+                self._channel_name,
+                turn_id,
+                start_buffer_ms,
+                final_buffer_ms,
+                target_ms,
+                waited_ms,
+            )
+        return waited_ms
 
     async def _store_frame(self, snapshot: FrameSnapshot) -> None:
         async with self._frame_lock:

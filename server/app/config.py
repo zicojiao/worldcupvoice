@@ -52,6 +52,8 @@ class Settings(BaseModel):
     commentary_audio_sample_rate: int = 24000
     commentary_audio_consume_interval_ms: int = 60
     commentary_audio_backlog_limit_ms: int = 2500
+    commentary_audio_drain_target_ms: int = 250
+    commentary_audio_drain_timeout_ms: int = 8000
     commentary_audio_keepalive: bool = False
     live_session_max_seconds: float = 900.0
     viewer_heartbeat_timeout_seconds: float = 45.0
@@ -132,6 +134,12 @@ def get_settings() -> Settings:
         ),
         commentary_audio_backlog_limit_ms=int(
             os.getenv("COMMENTARY_AUDIO_BACKLOG_LIMIT_MS", "2500")
+        ),
+        commentary_audio_drain_target_ms=int(
+            os.getenv("COMMENTARY_AUDIO_DRAIN_TARGET_MS", "250")
+        ),
+        commentary_audio_drain_timeout_ms=int(
+            os.getenv("COMMENTARY_AUDIO_DRAIN_TIMEOUT_MS", "8000")
         ),
         commentary_audio_keepalive=os.getenv(
             "COMMENTARY_AUDIO_KEEPALIVE", "false"
