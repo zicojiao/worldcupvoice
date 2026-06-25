@@ -357,6 +357,9 @@ export default function ConversationComponent({
   const [aiActionError, setAiActionError] = useState<string | null>(null);
   const [selectedProfileId, setSelectedProfileId] =
     useState<CommentatorProfileId>(DEFAULT_COMMENTATOR_PROFILE_ID);
+  const [transcriptResetAtMs, setTranscriptResetAtMs] = useState<number | null>(
+    null,
+  );
   const [connectionIssues, setConnectionIssues] = useState<ConnectionIssue[]>(
     [],
   );
@@ -571,15 +574,30 @@ export default function ConversationComponent({
 
   const transcript = useMemo(() => {
     return normalizeTranscript(rawTranscript, String(client.uid)).filter(
-      (item) => !isVisualObservationTick(item.text),
+      (item) => {
+        if (isVisualObservationTick(item.text)) return false;
+        if (transcriptResetAtMs === null) return true;
+        if (typeof item._time !== 'number') return false;
+        return normalizeTimestampMs(item._time) >= transcriptResetAtMs;
+      },
     );
-  }, [rawTranscript, client.uid]);
+  }, [rawTranscript, client.uid, transcriptResetAtMs]);
 
   const messageList = useMemo(() => getMessageList(transcript), [transcript]);
 
   const currentInProgressMessage = useMemo(() => {
     return getCurrentInProgressMessage(transcript);
   }, [transcript]);
+
+  const handleProfileChange = useCallback(
+    (profileId: CommentatorProfileId) => {
+      if (profileId === selectedProfileId) return;
+      setSelectedProfileId(profileId);
+      setTranscriptResetAtMs(Date.now());
+      setRawTranscript([]);
+    },
+    [selectedProfileId],
+  );
 
   useClientEvent(client, 'connection-state-change', (curState) => {
     setConnectionState(curState);
@@ -946,7 +964,7 @@ export default function ConversationComponent({
           selectedProfileId={selectedProfileId}
           onStartAi={handleStartAi}
           onStopAi={handleStopAi}
-          onProfileChange={setSelectedProfileId}
+          onProfileChange={handleProfileChange}
         />
       }
       onEndConversation={handleEndConversation}
