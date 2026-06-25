@@ -78,6 +78,7 @@ export interface ClientStartRequest {
   channel_name: string;
   source_mode?: SourceMode;
   match_context?: MatchContext;
+  commentator_profile_id?: string;
   // Access gate password, validated server-side; never forwarded to the Python backend.
   access_password?: string;
 }
@@ -147,6 +148,8 @@ export interface SessionStatusResponse {
   session_id?: string | null;
   agent_id?: string | null;
   channel_name?: string | null;
+  commentator_profile_id?: string | null;
+  commentator_profile_label?: string | null;
   created_at?: number | null;
   stopped_at?: number | null;
   stop_reason?: string | null;
@@ -167,6 +170,8 @@ export interface AgentResponse {
   source_mode?: SourceMode;
   agent_uid: string;
   media_uid: string;
+  commentator_profile_id?: string;
+  commentator_profile_label?: string;
   vision_mode?: string;
   warnings?: string[];
 }

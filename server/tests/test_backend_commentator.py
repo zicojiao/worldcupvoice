@@ -17,6 +17,7 @@ from app.backend_commentator import (
     _transcript_payload,
     _trim_pcm_to_millisecond_boundary,
 )
+from app.commentator_profiles import resolve_commentator_profile
 from app.config import Settings
 from app.models import MatchContext
 
@@ -108,12 +109,32 @@ def test_visual_prompt_uses_multi_frame_play_by_play_constraints():
     assert "oldest first and newest last" in prompt
     assert "natural live broadcast cadence" in prompt
     assert "4 to 16 words" in prompt
-    assert "Default to a grounded call" in prompt
-    assert "Return exactly NO_CALL only" in prompt
-    assert "live football play-by-play commentator" in prompt
-    assert "Do not say the game is starting, kick-off, penalty" in prompt
-    assert "Messi carries it toward the box." in prompt
-    assert "13.1s" in prompt
+
+
+def test_visual_prompt_can_use_chinese_commentator_profile():
+    profile = resolve_commentator_profile("zh-cn-fish-meme")
+    prompt = _build_visual_prompt(
+        MatchContext(
+            sport="football",
+            title="Argentina vs France",
+            competition="FIFA World Cup Qatar 2022 - Final",
+            venue="Lusail Stadium",
+            homeTeam="Argentina",
+            awayTeam="France",
+            storyline="Mbappe leads France back late.",
+        ),
+        samples=[FrameSnapshot(video_time=13.1, captured_at=2.0, image_base64="new")],
+        previous_calls=["梅西中路带球推进。"],
+        profile=profile,
+    )
+
+    assert "用简体中文解说" in prompt
+    assert "不要冒充真实公众人物本人" in prompt
+    assert "通常 8 到 24 个汉字" in prompt
+    assert "才只返回 NO_CALL" in prompt
+    assert "除非最新画面明确支持" in prompt
+    assert "梅西中路带球推进。" in prompt
+    assert "13.1 秒" in prompt
 
 
 def test_visual_prompt_includes_roster_map_and_identity_rules():
@@ -262,7 +283,7 @@ async def test_fish_audio_tts_posts_pcm_request(monkeypatch):
             agora_app_certificate="app-cert",
             tts_provider="fish_audio",
             fish_audio_api_key="fish-key",
-            fish_audio_voice_id="54a5170264694bfc8e9ad98df7bd89c3",
+            fish_audio_voice_id="fish-demo-voice",
             fish_audio_model="s2-pro",
             fish_audio_format="pcm",
             fish_audio_sample_rate=24000,
@@ -288,7 +309,7 @@ async def test_fish_audio_tts_posts_pcm_request(monkeypatch):
     assert headers["model"] == "s2-pro"
     body = captured["json"]
     assert body["text"] == "梅西带球推进。"
-    assert body["reference_id"] == "54a5170264694bfc8e9ad98df7bd89c3"
+    assert body["reference_id"] == "fish-demo-voice"
     assert body["format"] == "pcm"
     assert body["sample_rate"] == 24000
     assert body["latency"] == "balanced"

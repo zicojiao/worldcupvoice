@@ -17,6 +17,7 @@ from agora_agent.agentkit.token import ROLE_PUBLISHER, generate_rtc_token
 from PIL import Image
 
 from .agora_region import area_code_value
+from .commentator_profiles import CommentatorProfile
 from .config import Settings
 from .models import CommentatorStats, MatchContext
 
@@ -167,13 +168,15 @@ def _push_audio_chunk_to_connection(
     return sender.send_audio_pcm_data(frame)
 
 
-def _transcript_payload(*, text: str, agent_uid: int, turn_id: int) -> bytes:
+def _transcript_payload(
+    *, text: str, agent_uid: int, turn_id: int, language: str = "en"
+) -> bytes:
     payload = {
         "object": "assistant.transcription",
         "text": text,
         "start_ms": 0,
         "duration_ms": 0,
-        "language": "en",
+        "language": language,
         "turn_id": turn_id,
         "stream_id": 0,
         "user_id": str(agent_uid),
@@ -190,6 +193,7 @@ def _build_visual_prompt(
     *,
     samples: list[FrameSnapshot],
     previous_calls: list[str],
+    profile: CommentatorProfile | None = None,
 ) -> str:
     if match is None:
         context = "Game context: the live sports feed."
@@ -198,8 +202,32 @@ def _build_visual_prompt(
 
     latest_time = samples[-1].video_time if samples else 0.0
     previous = "\n".join(f"- {call}" for call in previous_calls[-5:]) or "- none"
+    if profile and profile.language.startswith("zh"):
+        return (
+            "你是实时足球解说员，不是图片说明员。\n"
+            f"解说员角色：{profile.label}。\n"
+            f"风格要求：{profile.style_prompt}\n"
+            f"{context}\n"
+            f"当前视频源时间：{latest_time:.1f} 秒。\n"
+            "你会看到一小段连续画面，顺序是从旧到新。只解说最新可见动作："
+            "持球推进、盘带、传球、斜传、传中、射门、扑救、解围、逼抢、反击、"
+            "防线移动、庆祝或球员重新组织。快节奏时短句，发展中的进攻可以稍长，"
+            "通常 8 到 24 个汉字，最多一句。\n"
+            "只要画面里能看清比赛、球员、球场或球权区域，就给出有依据的解说。"
+            "只有在最新画面不可读、没有足球动作、或明显是静态暂停/纯观众镜头时，"
+            "才只返回 NO_CALL。\n"
+            "写之前先检查持球人、传球人、射门人、门将和最近防守人的球衣号码。"
+            "如果号码、球衣颜色和阵容信息能对应，就用球员短名；看不清号码时，"
+            "用位置或角色描述，不要编球员名。\n"
+            "除非最新画面明确支持，不要说开球、点球、进球、扳平、犯规、比分、"
+            "场外声音或画面外事件。已知最终比分只是背景元数据，不要当成实时比分播报。\n"
+            "避免重复最近这些解说：\n"
+            f"{previous}"
+        )
     return (
         "You are a live football play-by-play commentator, not an image captioner.\n"
+        f"Commentator profile: {profile.label if profile else 'Default sportscaster'}.\n"
+        f"Style guide: {profile.style_prompt if profile else 'Use grounded live broadcast play-by-play.'}\n"
         f"{context}\n"
         f"Current video clock in the source: {latest_time:.1f}s.\n"
         "You are given a short burst of frames, oldest first and newest last. "
@@ -814,12 +842,14 @@ class BackendVisionCommentator:
         agent_uid: int,
         match_context: MatchContext | None,
         media_uid: int,
+        profile: CommentatorProfile | None = None,
     ):
         self._settings = settings
         self._channel_name = channel_name
         self._agent_uid = agent_uid
         self._match_context = match_context
         self._media_uid = media_uid
+        self._profile = profile
         self._stop = asyncio.Event()
         self._task: asyncio.Task[None] | None = None
         self._sampler_task: asyncio.Task[None] | None = None
@@ -1262,6 +1292,7 @@ class BackendVisionCommentator:
                     self._match_context,
                     samples=samples,
                     previous_calls=self._previous_calls,
+                    profile=self._profile,
                 ),
             }
         ]
@@ -1594,6 +1625,7 @@ class BackendVisionCommentator:
             text=text,
             agent_uid=self._agent_uid,
             turn_id=self._turn_id,
+            language=self._profile.transcript_language if self._profile else "en",
         )
         ret = connection.send_stream_message(payload)
         if ret != 0:

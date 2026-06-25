@@ -143,8 +143,21 @@ OPENAI_API_KEY=
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
-FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+FISH_AUDIO_VOICE_ID_ZH_MEME=
+FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
+
+开源仓库只提供解说员角色和 prompt，不绑定你的私有 voice id。开发者需要在
+Fish Audio 里创建自己的声音，再填到对应 env。某个角色没有配置专属或通用第三方 voice
+id 时，后端会自动回退到 OpenAI TTS，保证本地仍能跑通。
+
+内置 profile 的产品展示名保持英文：
+
+| Profile | Provider | Voice env |
+| --- | --- | --- |
+| Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
+| Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
+| English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
 
 在 ElevenLabs 里创建自己的 voice，然后把 voice ID 写到 `server/.env.local`：
 
@@ -152,6 +165,7 @@ FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
 TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
 ```
 
 在 ElevenLabs 后台：

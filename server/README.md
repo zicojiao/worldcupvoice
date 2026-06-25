@@ -48,8 +48,13 @@ For Chinese commentary voices, Fish Audio is also supported:
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
-FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+FISH_AUDIO_VOICE_ID_ZH_MEME=
+FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
+
+Profile voice IDs are deployment config, not source code. Your public fork can
+run without them because the backend falls back to OpenAI TTS when a selected
+third-party profile has no profile-specific or generic configured voice ID.
 
 In ElevenLabs, open **VoiceLab**, click **Create Voice**, choose **Voice
 Design**, paste the prompt below, generate and save a sportscaster voice, then

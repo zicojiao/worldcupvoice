@@ -32,7 +32,7 @@ class Settings(BaseModel):
     elevenlabs_use_speaker_boost: bool = True
     elevenlabs_streaming: bool = True
     fish_audio_api_key: str | None = None
-    fish_audio_voice_id: str | None = "54a5170264694bfc8e9ad98df7bd89c3"
+    fish_audio_voice_id: str | None = None
     fish_audio_model: str = "s2-pro"
     fish_audio_format: str = "pcm"
     fish_audio_sample_rate: int | None = None
@@ -104,10 +104,7 @@ def get_settings() -> Settings:
         elevenlabs_streaming=os.getenv("ELEVENLABS_STREAMING", "true").lower()
         not in {"0", "false", "no"},
         fish_audio_api_key=os.getenv("FISH_AUDIO_API_KEY"),
-        fish_audio_voice_id=os.getenv(
-            "FISH_AUDIO_VOICE_ID",
-            "54a5170264694bfc8e9ad98df7bd89c3",
-        ),
+        fish_audio_voice_id=os.getenv("FISH_AUDIO_VOICE_ID"),
         fish_audio_model=os.getenv("FISH_AUDIO_MODEL", "s2-pro"),
         fish_audio_format=os.getenv("FISH_AUDIO_FORMAT", "pcm").lower(),
         fish_audio_sample_rate=int(

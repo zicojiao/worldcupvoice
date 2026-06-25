@@ -39,6 +39,11 @@ import {
 import { QuickstartTranscriptPanel } from './QuickstartTranscriptPanel';
 import { Button } from '@/components/ui/button';
 import { toMatchContext } from '@/lib/commentary';
+import {
+  COMMENTATOR_PROFILES,
+  DEFAULT_COMMENTATOR_PROFILE_ID,
+  type CommentatorProfileId,
+} from '@/lib/commentatorProfiles';
 import type {
   ActiveAgentSession,
   AgentErrorResponse,
@@ -135,20 +140,27 @@ function BackendSessionMonitor({
   isAiStarting,
   actionError,
   clientAudioStats,
+  selectedProfileId,
   onStartAi,
   onStopAi,
+  onProfileChange,
 }: {
   status: SessionStatusResponse | null;
   activeAgent: ActiveAgentSession | null;
   isAiStarting: boolean;
   actionError: string | null;
   clientAudioStats: ClientAudioStats | null;
+  selectedProfileId: CommentatorProfileId;
   onStartAi: () => void;
   onStopAi: () => void;
+  onProfileChange: (profileId: CommentatorProfileId) => void;
 }) {
   const events = status?.events.slice(-12).reverse() ?? [];
   const isAiRunning = Boolean(activeAgent);
   const stats = status?.stats;
+  const selectedProfile =
+    COMMENTATOR_PROFILES.find((profile) => profile.id === selectedProfileId) ??
+    COMMENTATOR_PROFILES[0];
   const metricItems = [
     ['Frames', String(stats?.frames_sampled ?? 0)],
     ['Vision', String(stats?.vision_requests ?? 0)],
@@ -174,11 +186,28 @@ function BackendSessionMonitor({
           <p className="font-semibold text-foreground">AI commentary</p>
           <p className="text-xs text-muted-foreground">
             {isAiRunning
-              ? `${status?.state ?? 'starting'} · ${status?.channel_name ? `channel ${status.channel_name}` : 'AI session active'}`
+              ? `${status?.state ?? 'starting'} · ${status?.commentator_profile_label ?? selectedProfile.label}`
               : 'Off · live video continues without AI spend'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <label className="grid gap-1 text-xs text-muted-foreground">
+            <span>Commentator</span>
+            <select
+              value={selectedProfileId}
+              onChange={(event) =>
+                onProfileChange(event.target.value as CommentatorProfileId)
+              }
+              disabled={isAiRunning || isAiStarting}
+              className="h-9 rounded-md border border-border bg-background px-2 text-sm font-semibold text-foreground outline-none transition focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {COMMENTATOR_PROFILES.map((profile) => (
+                <option key={profile.id} value={profile.id}>
+                  {profile.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <div
             className={`w-fit rounded-md border px-2.5 py-1 text-xs font-semibold ${aiSpendClass(status)}`}
           >
@@ -313,6 +342,8 @@ export default function ConversationComponent({
     useState<SessionStatusResponse | null>(null);
   const [isAiStarting, setIsAiStarting] = useState(false);
   const [aiActionError, setAiActionError] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] =
+    useState<CommentatorProfileId>(DEFAULT_COMMENTATOR_PROFILE_ID);
   const [connectionIssues, setConnectionIssues] = useState<ConnectionIssue[]>(
     [],
   );
@@ -605,6 +636,7 @@ export default function ConversationComponent({
           channel_name: agoraData.channel,
           source_mode: 'agora-gateway',
           match_context: toMatchContext(match),
+          commentator_profile_id: selectedProfileId,
           access_password: accessPassword,
         } as ClientStartRequest),
         cache: 'no-store',
@@ -646,6 +678,7 @@ export default function ConversationComponent({
     isAiStarting,
     isMediaFeedConnected,
     match,
+    selectedProfileId,
   ]);
 
   const handleStopAi = useCallback(async () => {
@@ -897,8 +930,10 @@ export default function ConversationComponent({
           isAiStarting={isAiStarting}
           actionError={aiActionError}
           clientAudioStats={clientAudioStats}
+          selectedProfileId={selectedProfileId}
           onStartAi={handleStartAi}
           onStopAi={handleStopAi}
+          onProfileChange={setSelectedProfileId}
         />
       }
       onEndConversation={handleEndConversation}

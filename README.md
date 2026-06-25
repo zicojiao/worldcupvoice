@@ -151,8 +151,22 @@ commentary voices:
 ```bash
 TTS_PROVIDER=fish_audio
 FISH_AUDIO_API_KEY=
-FISH_AUDIO_VOICE_ID=54a5170264694bfc8e9ad98df7bd89c3
+FISH_AUDIO_VOICE_ID_ZH_MEME=
+FISH_AUDIO_VOICE_ID_ZH_TACTICAL=
 ```
+
+The open-source project ships commentator profiles and prompts, not private
+voice IDs. Create your own Fish Audio voice and put its ID in the matching env
+variable. If neither a profile-specific nor generic third-party voice ID is configured,
+the backend falls back to OpenAI TTS so local setup still works.
+
+Built-in profile voice variables:
+
+| Profile | Provider | Voice env |
+| --- | --- | --- |
+| Chinese Meme Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_MEME` |
+| Chinese Tactical Commentary | Fish Audio | `FISH_AUDIO_VOICE_ID_ZH_TACTICAL` |
+| English Sportscaster | ElevenLabs | `ELEVENLABS_VOICE_ID_EN_SPORTSCASTER` |
 
 Create your own ElevenLabs voice and put its voice ID in `server/.env.local`:
 
@@ -160,6 +174,7 @@ Create your own ElevenLabs voice and put its voice ID in `server/.env.local`:
 TTS_PROVIDER=elevenlabs
 ELEVENLABS_API_KEY=
 ELEVENLABS_VOICE_ID=
+ELEVENLABS_VOICE_ID_EN_SPORTSCASTER=
 ```
 
 In ElevenLabs:
